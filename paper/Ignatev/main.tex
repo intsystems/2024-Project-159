@@ -13,6 +13,7 @@
 \usepackage{graphicx}
 \usepackage{natbib}
 \usepackage{doi}
+\usepackage{bbm}
 
 
 
@@ -79,6 +80,33 @@
 нейронные сети (GNN) для обнаружения и моделирования внутренней связи
 различных участков головного мозга. В данной работе предлагается рассмотреть модели графовой диффузии. Выдвигается гипотеза о том, что они покажут результаты для классификации активности головного мозга лучше, чем модели, не использующие графовое представление сигнала, и более простые графовые сверточные сети (GCN).
 \bibliographystyle{unsrtnat}
+
+\section{Постановка задачи}
+Дана выборка $\mathcal{D} = (\underline{\mathbf{X}}, \mathbf{Z}, \mathbf{y})$ активности головного мозга, где
+\[ \underline{\mathbf{X}} =[︀X_m]︀_{m=1}^M \textrm{ -- набор сигналов,}\]
+\[\mathbf{X}_m=[\mathbf{x}_t]_{t\in T}  \textrm{ -- сигнал, полученный в} m\textrm{-ом испытании,}\]
+\[\mathbf{x}_t \in \mathbb{R}^E \textrm{ -- наблюдения сигнала в момент времени }t, \]
+\[\mathbf{Z} = [\mathbf{z}_k]_{k=1}^E
+z_k \in \mathbf{R}^3 \textrm{ -- координаты электродов},\]
+\[\mathbf{y} = [y_m]_{m=1}^M \textrm{ -- целевая переменная,}\]
+\[y_m \in {1,... C} \textrm{ -- метка класса},\]
+\[T = \{t_n\}_{n=1}^N \textrm{ -- набор временных отсчетов},\]
+\[E = 62 \textrm{ -- число электродов,}\]
+\[N \textrm{ -- число наблюдений в одном отрезке сигнала.}\]
+Для устойчивости решения на матрицу связности накладывается штраф за плотность:
+\[\underline{\mathbf{A}}^*_{\underline{\mathbf{X}},\mathbf{Z}} = \arg \min_{\underline{\mathbf{A}}_{\underline{\mathbf{X}},\mathbf{Z}}} \bigg| \| \underline{\mathbf{A}}_{\underline{\mathbf{X}},\mathbf{Z}}\|_1 -p\bigg|\]
+где $p$ соответствует степени разреженности связей и подбирается из априорных предположений.
+Для решения задачи декодирования рассматривается модель из класса графовых рекуррентных нейронный сетей:
+\[h_{\mathbf{\theta}} : (\underline{\mathbf{X}}, \underline{\mathbf{A}}^*_{\underline{\mathbf{X}},\mathbf{Z}}) \rightarrow y. \]
+В качестве функции ошибки выбрана кросс–энтропия:
+\[\mathcal{L} = - \frac{1}{M} \sum\limits_{m=1}^M\bigg[\sum\limits_{c=1}^C\mathbbm{1}(y_m=c)\log(p_m^c)\bigg],\] 
+где
+\[ p_m^c = h_{\mathbf{\theta}}\bigg(\mathbf{X}_m, \underline{\mathbf{A}}^*_{\underline{\mathbf{X}},\mathbf{Z}}(m)\bigg) \textrm{-- вероятность класса} c\]
+\[\textrm{для } X_m \textrm{ с матрицей } \underline{\mathbf{A}}^*_{\underline{\mathbf{X}},\mathbf{Z}}(m)\]
+Задача поиска оптимальных параметров имеет следующий вид:
+\[\hat\mathbf{\theta} = \arg\max_\mathbf{\theta} \mathcal{L}(\mathbf{\theta}, \mathbf{X}, \underline{\mathbf{A}}^*_{\underline{\mathbf{X}},\mathbf{Z}})\] 
 %\bibliography{references}
 
+
 \end{document}
+
